@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Task Motion App</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(-45deg, #667eea, #764ba2, #6b73ff, #9f44d3);
+  background-size: 400% 400%;
+  animation: gradientMove 10s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+#app {
+  width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 25px;
+  border-radius: 25px;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+  color: white;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+}
+
+button {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.add-btn {
+  width: 100%;
+  background: #00c9ff;
+  color: white;
+  font-weight: bold;
+}
+
+.add-btn:hover {
+  transform: scale(1.05);
+  background: #00b0e6;
+}
+
+.task-card {
+  background: rgba(255,255,255,0.2);
+  padding: 15px;
+  border-radius: 20px;
+  margin-top: 15px;
+  transition: 0.4s;
+  backdrop-filter: blur(10px);
+}
+
+.task-card:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-title {
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.task-title.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.actions button {
+  background: transparent;
+  font-size: 18px;
+  color: white;
+}
+
+.actions button:hover {
+  transform: scale(1.3) rotate(10deg);
+}
+
+.desc {
+  margin-top: 10px;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+/* Animaciones Vue */
+.list-enter-active {
+  animation: bounceIn 0.5s ease;
+}
+
+.list-leave-active {
+  animation: fadeOut 0.4s ease forwards;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateX(50px); }
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <h1>🚀 Motion Tasks</h1>
+
+  <input v-model="title" placeholder="Título...">
+  <textarea v-model="description" placeholder="Descripción..."></textarea>
+  <button class="add-btn" @click="addTask">Agregar</button>
+
+  <transition-group name="list">
+    <div class="task-card" v-for="(task, i) in tasks" :key="task.id">
+      <div class="task-header">
+        <span 
+          class="task-title"
+          :class="{completed: task.completed}"
+          @click="toggle(task)">
+          {{ task.title }}
+        </span>
+
+        <div class="actions">
+          <button @click="task.show = !task.show">📖</button>
+          <button @click="remove(i)">🗑</button>
+        </div>
+      </div>
+
+      <transition name="slide">
+        <div v-if="task.show" class="desc">
+          {{ task.description }}
+        </div>
+      </transition>
+
+    </div>
+  </transition-group>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      title: "",
+      description: "",
+      tasks: []
+    }
+  },
+  methods: {
+    addTask() {
+      if (!this.title.trim()) return;
+
+      this.tasks.push({
+        id: Date.now(),
+        title: this.title,
+        description: this.description,
+        completed: false,
+        show: false
+      });
+
+      this.title = "";
+      this.description = "";
+    },
+    toggle(task) {
+      task.completed = !task.completed;
+    },
+    remove(i) {
+      this.tasks.splice(i,1);
+    }
+  }
+}).mount("#app");
+</script>
+
+</body>
+</html>
